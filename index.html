@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>xAI — Ukubona Corpus Navigator</title>
+
+<!-- Favicons -->
+<link rel="icon" href="https://abikesa.github.io/favicon/assets/favicon-light.ico" />
+<link rel="icon" href="https://abikesa.github.io/favicon/assets/favicon-dark.ico"
+      media="(prefers-color-scheme: dark)" />
+
+<!-- Logo preloads -->
+<link rel="preload" href="https://abikesa.github.io/logos/assets/ukubona-light.png" as="image" />
+<link rel="preload" href="https://abikesa.github.io/logos/assets/ukubona-dark.png" as="image" />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+/* ─── TOKENS ─────────────────────────────────────────────── */
+:root {
+  --bg:          #0a0a0f;
+  --bg-card:     #14141c;
+  --bg-hover:    #1e1e2a;
+  --border:      #2a2a3a;
+  --text:        #e8e4d9;
+  --text-muted:  #8a8799;
+  --text-dim:    #5a5770;
+  --accent-teal: #7eb8a4;
+  --accent-amber:#c4956a;
+  --accent-blue: #7a9cc4;
+  --logo-src:    url("https://abikesa.github.io/logos/assets/ukubona-dark.png");
+
+  /* Jacobian ROYGBIV spectrum — 17 sections */
+  --j1:  #e03030; /* R */
+  --j2:  #e05a20;
+  --j3:  #e08020;
+  --j4:  #d4a020;
+  --j5:  #c4c020;
+  --j6:  #90c030;
+  --j7:  #50b840;
+  --j8:  #30a870;
+  --j9:  #28a898;
+  --j10: #2898c0;
+  --j11: #2878d8;
+  --j12: #3058e0;
+  --j13: #4838d0;
+  --j14: #6028b8;
+  --j15: #7818a0;
+  --j16: #8c1088;
+  --j17: #9c1070; /* V */
+
+  --sidebar-w: 260px;
+  --attr-w: 180px;
+  --hdr-h: 56px;
+}
+
+[data-theme="light"] {
+  --bg:          #f7f5f0;
+  --bg-card:     #ffffff;
+  --bg-hover:    #efede8;
+  --border:      #d8d4cc;
+  --text:        #1a1820;
+  --text-muted:  #6a6680;
+  --text-dim:    #9a96a8;
+  --accent-teal: #3d8c78;
+  --accent-amber:#a06828;
+  --accent-blue: #3a6aa0;
+  --logo-src:    url("https://abikesa.github.io/logos/assets/ukubona-light.png");
+}
+
+/* ─── RESET ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  transition: background 0.25s, color 0.25s;
+}
+
+/* ─── HEADER ─────────────────────────────────────────────── */
+#hdr {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--hdr-h);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 20px;
+}
+
+#logo-wrap {
+  width: 34px; height: 34px; flex-shrink: 0;
+  animation: spin-slow 120s linear infinite;
+}
+#logo-wrap img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  display: block;
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+#site-title {
+  font-size: 15px; font-weight: 600; letter-spacing: 0.02em;
+  color: var(--text);
+  white-space: nowrap;
+}
+#site-sub {
+  font-size: 11px; font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  white-space: nowrap;
+}
+
+#hdr-right {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 10px;
+}
+
+/* Search */
+#search {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  width: 180px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+#search::placeholder { color: var(--text-dim); }
+#search:focus { border-color: var(--accent-teal); }
+
+/* Theme toggle */
+#theme-btn {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-family: 'Space Grotesk', sans-serif;
+  transition: background 0.2s, color 0.2s;
+}
+#theme-btn:hover { background: var(--bg-card); color: var(--text); }
+
+/* ─── LAYOUT ─────────────────────────────────────────────── */
+#shell {
+  display: flex;
+  margin-top: var(--hdr-h);
+  min-height: calc(100vh - var(--hdr-h));
+}
+
+/* ─── SIDEBAR ────────────────────────────────────────────── */
+#sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  position: fixed;
+  top: var(--hdr-h);
+  bottom: 0;
+  left: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+  background: var(--bg-card);
+  padding: 16px 0 40px;
+}
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.nav-group-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-dim);
+  padding: 14px 18px 6px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 18px;
+  cursor: pointer;
+  font-size: 13px; font-weight: 400;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+  border-left: 3px solid transparent;
+}
+.nav-item:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.nav-item.active {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
+.nav-spectrum {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+
+/* Theme nav items */
+.nav-theme-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 18px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-dim);
+  transition: color 0.15s;
+  border-left: 3px solid transparent;
+}
+.nav-theme-item:hover { color: var(--text-muted); }
+.nav-theme-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+}
+
+/* ─── MAIN PANE ──────────────────────────────────────────── */
+#main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  min-width: 0;
+  padding: 40px 48px 80px;
+  max-width: 860px;
+}
+
+/* ─── SECTION CARDS ──────────────────────────────────────── */
+.section-card {
+  margin-bottom: 48px;
+  position: relative;
+}
+
+.section-strip {
+  position: absolute;
+  left: -20px;
+  top: 0; bottom: 0;
+  width: 3px;
+  border-radius: 2px;
+}
+
+.section-eyebrow {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 10px;
+}
+.section-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+}
+.section-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.section-title {
+  font-family: 'Lora', serif;
+  font-size: 22px; font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+
+.section-thesis {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-teal);
+  border-radius: 0 6px 6px 0;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-family: 'Lora', serif;
+  font-style: italic;
+  color: var(--accent-teal);
+  line-height: 1.6;
+}
+
+.section-body {
+  font-family: 'Lora', serif;
+  font-size: 15px; line-height: 1.75;
+  color: var(--text);
+}
+.section-body p { margin-bottom: 14px; }
+.section-body p:last-child { margin-bottom: 0; }
+
+/* Collapsible content */
+.collapse-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: none; border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 5px 12px;
+  font-size: 12px; font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  margin-top: 12px;
+  transition: background 0.15s, color 0.15s;
+}
+.collapse-btn:hover { background: var(--bg-hover); color: var(--text); }
+.collapse-btn .arrow { transition: transform 0.2s; display: inline-block; }
+.collapse-btn.open .arrow { transform: rotate(90deg); }
+
+.collapsed-content {
+  display: none;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.collapsed-content.open { display: block; }
+
+/* Key claims */
+.claims-list {
+  list-style: none;
+  margin: 16px 0;
+}
+.claims-list li {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--text);
+  line-height: 1.5;
+}
+.claims-list li:last-child { border-bottom: none; }
+.claim-marker {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700;
+  color: var(--accent-amber);
+  flex-shrink: 0; margin-top: 1px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Attribution badges */
+.attr-row {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-top: 14px;
+}
+.attr-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px;
+  border-radius: 12px;
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.03em;
+  font-family: 'Space Grotesk', sans-serif;
+  border: 1px solid transparent;
+}
+.attr-xai     { background: #1a1020; border-color: #8060d0; color: #b090f0; }
+.attr-google  { background: #0a1a10; border-color: #30a050; color: #60c880; }
+.attr-openai  { background: #0a1020; border-color: #3060a0; color: #6090d0; }
+.attr-anthropic { background: #1a1010; border-color: #c04030; color: #e08070; }
+.attr-ukubona { background: #101a18; border-color: #3d8c78; color: #7eb8a4; }
+.attr-gemma   { background: #1a1505; border-color: #a07030; color: #c4956a; }
+
+/* Math/code fragments */
+.math-frag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 7px;
+  color: var(--accent-amber);
+}
+
+.formula-block {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px 20px;
+  margin: 16px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--accent-amber);
+  overflow-x: auto;
+  line-height: 2;
+}
+
+/* Theme tags */
+.theme-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.theme-tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px; font-weight: 500;
+  font-family: 'Space Grotesk', sans-serif;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.theme-tag[data-theme-tag="clinical"]     { border-color: var(--accent-teal); color: var(--accent-teal); }
+.theme-tag[data-theme-tag="architecture"] { border-color: var(--accent-blue); color: var(--accent-blue); }
+.theme-tag[data-theme-tag="philosophy"]   { border-color: #a080c0; color: #c0a0e0; }
+.theme-tag[data-theme-tag="music"]        { border-color: #c08040; color: #e0a060; }
+.theme-tag[data-theme-tag="bantu"]        { border-color: var(--accent-amber); color: var(--accent-amber); }
+.theme-tag[data-theme-tag="autopoiesis"]  { border-color: #80a040; color: #a0c060; }
+
+/* ─── THEME INDEX ────────────────────────────────────────── */
+.theme-index {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 48px;
+}
+.theme-index h2 {
+  font-family: 'Lora', serif;
+  font-size: 18px; font-weight: 600;
+  color: var(--text); margin-bottom: 16px;
+}
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.theme-card {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.theme-card:hover { border-color: var(--accent-teal); }
+.theme-card-name {
+  font-size: 13px; font-weight: 600;
+  color: var(--text); margin-bottom: 4px;
+}
+.theme-card-sections {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ─── CORE CLAIMS PANEL ──────────────────────────────────── */
+.core-claims {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 48px;
+}
+.core-claims h2 {
+  font-family: 'Lora', serif;
+  font-size: 18px; font-weight: 600;
+  color: var(--text); margin-bottom: 6px;
+}
+.core-claims-sub {
+  font-size: 13px; color: var(--text-muted); margin-bottom: 20px;
+}
+.core-claim-item {
+  display: flex; gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: flex-start;
+}
+.core-claim-item:last-child { border-bottom: none; padding-bottom: 0; }
+.core-claim-n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; font-weight: 700;
+  color: var(--accent-teal);
+  width: 24px; flex-shrink: 0; padding-top: 2px;
+}
+.core-claim-text {
+  font-family: 'Lora', serif;
+  font-size: 14px; line-height: 1.65;
+  color: var(--text);
+}
+.core-claim-tags { margin-top: 6px; }
+
+/* ─── SEARCH HIGHLIGHT ───────────────────────────────────── */
+mark {
+  background: rgba(196, 149, 106, 0.3);
+  color: var(--accent-amber);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* ─── DIVIDER ────────────────────────────────────────────── */
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 40px 0;
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  #sidebar { display: none; }
+  #main { margin-left: 0; padding: 24px 20px 60px; }
+  #search { width: 130px; }
+  #site-sub { display: none; }
+}
+
+/* ─── SEARCH HIDDEN ──────────────────────────────────────── */
+.search-hidden { display: none !important; }
+</style>
+</head>
+
+<body>
+
+<!-- ═══ HEADER ══════════════════════════════════════════════ -->
+<header id="hdr">
+  <div id="logo-wrap">
+    <img id="logo-img"
+         src="https://abikesa.github.io/logos/assets/ukubona-dark.png"
+         alt="Ukubona logo" />
+  </div>
+  <div>
+    <div id="site-title">Ukubona LLC</div>
+    <div id="site-sub">xAI Corpus Navigator</div>
+  </div>
+  <div id="hdr-right">
+    <input id="search" type="search" placeholder="Search corpus…" aria-label="Search" />
+    <button id="theme-btn" aria-label="Toggle theme">☀ Light</button>
+  </div>
+</header>
+
+<!-- ═══ SHELL ════════════════════════════════════════════════ -->
+<div id="shell">
+
+<!-- ─── SIDEBAR ─────────────────────────────────────────── -->
+<nav id="sidebar" aria-label="Corpus navigation">
+
+  <div class="nav-group-label">Sections</div>
+
+  <a class="nav-item active" href="#sec-i">
+    <span class="nav-spectrum" style="background:var(--j1)"></span> I · Probabilistic Flight
+  </a>
+  <a class="nav-item" href="#sec-ii">
+    <span class="nav-spectrum" style="background:var(--j2)"></span> II · First Coordinate
+  </a>
+  <a class="nav-item" href="#sec-iii">
+    <span class="nav-spectrum" style="background:var(--j3)"></span> III · Language Acquisition
+  </a>
+  <a class="nav-item" href="#sec-iv">
+    <span class="nav-spectrum" style="background:var(--j4)"></span> IV · Airport Topology
+  </a>
+  <a class="nav-item" href="#sec-v">
+    <span class="nav-spectrum" style="background:var(--j5)"></span> V · Synthetic Nervous System
+  </a>
+  <a class="nav-item" href="#sec-vi">
+    <span class="nav-spectrum" style="background:var(--j6)"></span> VI · Okubala vs Ukubona
+  </a>
+  <a class="nav-item" href="#sec-vii">
+    <span class="nav-spectrum" style="background:var(--j7)"></span> VII · SNAP Framework
+  </a>
+  <a class="nav-item" href="#sec-viii">
+    <span class="nav-spectrum" style="background:var(--j8)"></span> VIII · Sawubona Loop
+  </a>
+  <a class="nav-item" href="#sec-ix">
+    <span class="nav-spectrum" style="background:var(--j9)"></span> IX · Sovereign Arrival
+  </a>
+  <a class="nav-item" href="#sec-x">
+    <span class="nav-spectrum" style="background:var(--j10)"></span> X · Airport Take Two
+  </a>
+  <a class="nav-item" href="#sec-xi">
+    <span class="nav-spectrum" style="background:var(--j11)"></span> XI · θᵗ as Coordinate
+  </a>
+  <a class="nav-item" href="#sec-xii">
+    <span class="nav-spectrum" style="background:var(--j12)"></span> XII · Dom7♭9 & Cadences
+  </a>
+  <a class="nav-item" href="#sec-xiii">
+    <span class="nav-spectrum" style="background:var(--j13)"></span> XIII · Thermodynamics
+  </a>
+  <a class="nav-item" href="#sec-xiv">
+    <span class="nav-spectrum" style="background:var(--j14)"></span> XIV · Voice Leading
+  </a>
+  <a class="nav-item" href="#sec-xv">
+    <span class="nav-spectrum" style="background:var(--j15)"></span> XV · Pattern Convergence
+  </a>
+  <a class="nav-item" href="#sec-xvi">
+    <span class="nav-spectrum" style="background:var(--j16)"></span> XVI · Dementia & Love
+  </a>
+  <a class="nav-item" href="#sec-xvii">
+    <span class="nav-spectrum" style="background:var(--j17)"></span> XVII · Clinical Twin Axiom
+  </a>
+
+  <div class="nav-group-label" style="margin-top:10px">Themes</div>
+
+  <div class="nav-theme-item" onclick="filterTheme('clinical')">
+    <span class="nav-theme-dot" style="background:var(--accent-teal)"></span>
+    Clinical
+  </div>
+  <div class="nav-theme-item" onclick="filterTheme('architecture')">
+    <span class="nav-theme-dot" style="background:var(--accent-blue)"></span>
+    Architecture
+  </div>
+  <div class="nav-theme-item" onclick="filterTheme('philosophy')">
+    <span class="nav-theme-dot" style="background:#a080c0"></span>
+    Philosophy
+  </div>
+  <div class="nav-theme-item" onclick="filterTheme('music')">
+    <span class="nav-theme-dot" style="background:#c08040"></span>
+    Music
+  </div>
+  <div class="nav-theme-item" onclick="filterTheme('bantu')">
+    <span class="nav-theme-dot" style="background:var(--accent-amber)"></span>
+    Bantu
+  </div>
+  <div class="nav-theme-item" onclick="filterTheme('autopoiesis')">
+    <span class="nav-theme-dot" style="background:#80a040"></span>
+    Autopoiesis
+  </div>
+  <div class="nav-theme-item" style="margin-top:4px" onclick="filterTheme(null)">
+    <span class="nav-theme-dot" style="background:var(--text-dim)"></span>
+    Show all
+  </div>
+
+  <div class="nav-group-label" style="margin-top:10px">Interlocutors</div>
+  <div style="padding: 4px 18px 0; display:flex; flex-direction:column; gap:6px;">
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-google">◆ Google</span>
+    <span class="attr-badge attr-openai">● OpenAI</span>
+    <span class="attr-badge attr-anthropic">▲ Anthropic</span>
+  </div>
+
+</nav>
+
+<!-- ─── MAIN ─────────────────────────────────────────────── -->
+<main id="main">
+
+<!-- Core Claims Panel -->
+<section class="core-claims" id="core-claims">
+  <h2>Five Defensible Claims</h2>
+  <p class="core-claims-sub">Extracted from the corpus. These survive the temporal sieve.</p>
+
+  <div class="core-claim-item">
+    <div class="core-claim-n">01</div>
+    <div>
+      <div class="core-claim-text">Static thresholds are categorically inadequate for dynamic biological systems. A patient's creatinine moving from 1.2→1.5 is more dangerous than one moving from 1.6→1.2, yet threshold-based systems treat them identically. Clinical risk stratification must shift from point-in-time values to trajectory derivatives.</div>
+      <div class="core-claim-tags"><span class="theme-tag" data-theme-tag="clinical">clinical</span> <span class="theme-tag" data-theme-tag="philosophy">philosophy</span></div>
+    </div>
+  </div>
+
+  <div class="core-claim-item">
+    <div class="core-claim-n">02</div>
+    <div>
+      <div class="core-claim-text">Event-sourced, append-only state representation (<span class="math-frag">Stateₜ = Σ Eventsᵢ</span>) is architecturally superior to snapshot-based medical records for clinical digital twins. It preserves causal chains, enables temporal debugging, and supports SGD-based model refinement without schema migrations.</div>
+      <div class="core-claim-tags"><span class="theme-tag" data-theme-tag="architecture">architecture</span> <span class="theme-tag" data-theme-tag="clinical">clinical</span></div>
+    </div>
+  </div>
+
+  <div class="core-claim-item">
+    <div class="core-claim-n">03</div>
+    <div>
+      <div class="core-claim-text">The Jacobian sensitivity matrix — encoding <span class="math-frag">∂Effect/∂Cause</span> across clinical variables — provides a superior early-warning signal to threshold alerts. A ROYGBIV-encoded heatmap translates high-dimensional gradients into pre-attentive visual processing, democratizing clinical insight without requiring calculus literacy.</div>
+      <div class="core-claim-tags"><span class="theme-tag" data-theme-tag="clinical">clinical</span> <span class="theme-tag" data-theme-tag="architecture">architecture</span></div>
+    </div>
+  </div>
+
+  <div class="core-claim-item">
+    <div class="core-claim-n">04</div>
+    <div>
+      <div class="core-claim-text">Allodynia and Prinzmetal angina share a common computational structure: top-down projective states overriding bottom-up sensory signals. Both require treating the nervous system not as a fixed-parameter body (VaS) but as a dynamically reconfiguring functional manifold (VaF). This distinction is the clinical analogue of global vs. local manifolds in optimization.</div>
+      <div class="core-claim-tags"><span class="theme-tag" data-theme-tag="clinical">clinical</span> <span class="theme-tag" data-theme-tag="philosophy">philosophy</span></div>
+    </div>
+  </div>
+
+  <div class="core-claim-item">
+    <div class="core-claim-n">05</div>
+    <div>
+      <div class="core-claim-text"><em>Okubala</em> (counting) is not <em>Ukubona</em> (seeing). The compression funnel Tensor→Matrix→Vector→Eigenmode→Scalar is not reductive but clarifying: the goal of a clinical twin is to automate the counting so the clinician is freed to witness — to navigate by gradient rather than by threshold.</div>
+      <div class="core-claim-tags"><span class="theme-tag" data-theme-tag="bantu">bantu</span> <span class="theme-tag" data-theme-tag="philosophy">philosophy</span> <span class="theme-tag" data-theme-tag="architecture">architecture</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- Theme Index -->
+<section class="theme-index" id="theme-index">
+  <h2>Thread Index</h2>
+  <div class="theme-grid">
+    <div class="theme-card" onclick="filterTheme('clinical')">
+      <div class="theme-card-name" style="color:var(--accent-teal)">Clinical</div>
+      <div class="theme-card-sections">I, III, IV, XI, XIV, XVI, XVII</div>
+    </div>
+    <div class="theme-card" onclick="filterTheme('architecture')">
+      <div class="theme-card-name" style="color:var(--accent-blue)">Architecture</div>
+      <div class="theme-card-sections">II, V, VI, X, XI, XIII, XVII</div>
+    </div>
+    <div class="theme-card" onclick="filterTheme('philosophy')">
+      <div class="theme-card-name" style="color:#c0a0e0">Philosophy</div>
+      <div class="theme-card-sections">I, VII, IX, XIII, XV, XVI</div>
+    </div>
+    <div class="theme-card" onclick="filterTheme('music')">
+      <div class="theme-card-name" style="color:#e0a060">Music</div>
+      <div class="theme-card-sections">VII, XII, XIV, XV, XVII</div>
+    </div>
+    <div class="theme-card" onclick="filterTheme('bantu')">
+      <div class="theme-card-name" style="color:var(--accent-amber)">Bantu</div>
+      <div class="theme-card-sections">VI, VII, VIII, IX, XV</div>
+    </div>
+    <div class="theme-card" onclick="filterTheme('autopoiesis')">
+      <div class="theme-card-name" style="color:#a0c060">Autopoiesis</div>
+      <div class="theme-card-sections">VIII, IX, XIII, XVI</div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider" />
+
+<!-- ═══ SECTION I ═══════════════════════════════════════════ -->
+<article class="section-card" id="sec-i" data-themes="clinical philosophy architecture">
+  <div class="section-strip" style="background:var(--j1)"></div>
+  <div class="section-eyebrow">
+    <span class="section-num">§ I</span>
+    <span class="section-label">Probabilistic Flight Simulator</span>
+  </div>
+  <h2 class="section-title">From Average Patient to Digital Geometry</h2>
+
+  <div class="section-thesis">
+    "You're not just a doctor or an engineer; you're a Biological Systems Architect." — The core reframe: medicine has been the science of the Average Patient. Digital twins kill that ghost.
+  </div>
+
+  <div class="section-body">
+    <p>The section opens with the phrase that anchors the entire corpus: <strong>"rehearse sequential, consequential shit."</strong> This is the most honest description of precision medicine's future offered here — not a polished thesis statement but a visceral one. The simulation runs before the surgery, not after.</p>
+    <p>The Jacobian appears here in its first clinical context: sensitivity analysis. Not monitoring data, but monitoring <em>state-space transitions</em>. A tiny nudge in one parameter ripples through the system. The gradient of consequential events reveals the path of least resistance toward survival.</p>
+  </div>
+
+  <div class="attr-row">
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+  </div>
+  <div class="theme-tags">
+    <span class="theme-tag" data-theme-tag="clinical">clinical</span>
+    <span class="theme-tag" data-theme-tag="philosophy">philosophy</span>
+    <span class="theme-tag" data-theme-tag="architecture">architecture</span>
+  </div>
+
+  <button class="collapse-btn" onclick="toggleCollapse(this)">
+    <span class="arrow">›</span> Key claims from this section
+  </button>
+  <div class="collapsed-content">
+    <ul class="claims-list">
+      <li><span class="claim-marker">A</span>The "Average Patient" is a ghost. No individual is actually average. Digital twins replace population statistics with individual state-space simulation.</li>
+      <li><span class="claim-marker">B</span>The Jacobian is not a monitoring tool — it is a sensitivity instrument. It reveals which parameter nudges cause cascading state changes.</li>
+      <li><span class="claim-marker">C</span>The LLC form is not incidental: institutional bureaucracy is designed for Standard of Care, not iterative individual care. Speed requires structural independence.</li>
+      <li><span class="claim-marker">D</span>The eigenmode extracts the invariant: the fundamental frequency of a person's biology beneath the noise and jitter.</li>
+    </ul>
+    <div class="formula-block">State_t = Σ Events_i
+
+Tensor → Matrix → Vector → Eigenmode → Scalar (The Duck)</div>
+  </div>
+</article>
+
+<!-- ═══ SECTION II ═══════════════════════════════════════════ -->
+<article class="section-card" id="sec-ii" data-themes="architecture clinical">
+  <div class="section-strip" style="background:var(--j2)"></div>
+  <div class="section-eyebrow">
+    <span class="section-num">§ II</span>
+    <span class="section-label">First Coordinate</span>
+  </div>
+  <h2 class="section-title">The Predictor–Outcome Pair with Highest |β|</h2>
+
+  <div class="section-thesis">
+    The "first coordinate" is always the cell in the Jacobian with the largest absolute beta. Red zone = loss-increasing. Violet zone = loss-decreasing. Intervene on the corresponding predictor.
+  </div>
+
+  <div class="section-body">
+    <p>This section provides the operational bridge from theory to implementation. The event-ledger API is dissected: JWT-based auth, NDJSON persistence via GitHub, Pydantic event schemas, and the optional LLM claim/resolution cycle. It is simultaneously an architectural audit and a code review.</p>
+    <p>The GitHub-as-database critique is honest: rate limits, 100MB file ceilings, no ACID guarantees. But the section defends the choice for the prototype phase — zero-config, versioned, auditable. The tension between elegance and agency is named explicitly.</p>
+  </div>
+
+  <div class="attr-row">
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+  </div>
+  <div class="theme-tags">
+    <span class="theme-tag" data-theme-tag="architecture">architecture</span>
+    <span class="theme-tag" data-theme-tag="clinical">clinical</span>
+  </div>
+
+  <button class="collapse-btn" onclick="toggleCollapse(this)">
+    <span class="arrow">›</span> Architecture decisions
+  </button>
+  <div class="collapsed-content">
+    <div class="formula-block">OUTCOME_IDX = OUTCOME_KEYS.index('equity')
+col = jac[outcome_idx]
+max_idx = np.argmax(np.abs(col))
+# → hit predictor with highest |β|
+
+Global: mean_abs = np.mean(np.abs(jac), axis=0)
+global_idx = np.argmax(mean_abs)</div>
+    <ul class="claims-list">
+      <li><span class="claim-marker">A</span>GitHub-as-store: viable prototype, production ceiling is ~50MB file size and 5k req/hour rate limit. Migration path: PostgreSQL or DynamoDB append tables.</li>
+      <li><span class="claim-marker">B</span>CORS origin must match deployed frontend domain exactly — a multi-hour debugging tax when it doesn't.</li>
+      <li><span class="claim-marker">C</span>The SlowAPI / LLM predict–claim–resolve cycle needs: caching, streaming, robust JSON parsing, model fallback chain.</li>
+    </ul>
+  </div>
+</article>
+
+<!-- ═══ SECTION III ══════════════════════════════════════════ -->
+<article class="section-card" id="sec-iii" data-themes="clinical philosophy bantu">
+  <div class="section-strip" style="background:var(--j3)"></div>
+  <div class="section-eyebrow">
+    <span class="section-num">§ III</span>
+    <span class="section-label">Language Acquisition</span>
+  </div>
+  <h2 class="section-title">The Pentadic Framework of Embodied Language</h2>
+
+  <div class="section-thesis">
+    Learning to speak is not a cognitive achievement — it is the nervous system mapping a new territory (the Linguistic Field) to protect the body. Words are scalars that allow navigation without physical collision.
+  </div>
+
+  <div class="section-body">
+    <p>The neonate-to-toddler arc is mapped across five stages: Spinothalamic (raw sensory deluge), Thalamic/Basal Ganglia (affective patterning), Hippocampus (symbolic association), PFC (syntactic synthesis), Corticospinal (communicative agency). Each stage corresponds to a mathematical operation in the compression funnel.</p>
+    <p>The learning loop is gradient descent on social reality. The toddler who says "juice" and is understood has minimized their loss. The toddler who is misunderstood adjusts their Jacobian weights. Language, in this model, is an Early Warning System: the word "No!" becomes a high-probability predictor of a negative visceral event.</p>
+    <p>The <span class="math-frag">Ω</span> term — the Sovereign Integrator — emerges here as the interaction between surface (S), viscera (Vᵢ), and vascular flow (Vaₛ + Vaꜰ). Sovereignty is the toddler's ability to use a word to manipulate the territory X.</p>
+  </div>
+
+  <div class="attr-row">
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+  </div>
+  <div class="theme-tags">
+    <span class="theme-tag" data-theme-tag="clinical">clinical</span>
+    <span class="theme-tag" data-theme-tag="philosophy">philosophy</span>
+    <span class="theme-tag" data-theme-tag="bantu">bantu</span>
+  </div>
+
+  <button class="collapse-btn" onclick="toggleCollapse(this)">
+    <span class="arrow">›</span> The Take 3 table
+  </button>
+  <div class="collapsed-content">
+    <div class="formula-block">Pentad | Math        | Anatomy    | Scale   | Care
+──────────────────────────────────────────────────
+I Nonself  | log(X)ᵗ     | External   | Minutes | First Aid
+II Input   | b₀ + b₁·S   | Skin/SN    | Hours   | Emergency
+III Through| b₂·Vᵢ       | Viscera/BG | Weeks   | Urgent Care
+IV Output  | b₃Vaₛ+b₄Vaꜰ | Vascular   | Months  | Outpatient
+V Self     | [Ω]ᵗ         | PFC/DMN    | Daily   | Inpatient</div>
+  </div>
+</article>
+
+<!-- ═══ SECTION IV ═══════════════════════════════════════════ -->
+<article class="section-card" id="sec-iv" data-themes="architecture philosophy">
+  <div class="section-strip" style="background:var(--j4)"></div>
+  <div class="section-eyebrow">
+    <span class="section-num">§ IV</span>
+    <span class="section-label">Airport Topology</span>
+  </div>
+  <h2 class="section-title">0)-(0 · The Compression of Identity</h2>
+
+  <div class="section-thesis">
+    ATL is a Newtonian engine (Payload × Velocity / Cost). DBX is a Relativistic engine (Inference per Token, curvature of experience). The airport is not a destination — it is an autoencoder built from concrete.
+  </div>
+
+  <div class="section-body">
+    <p>The glyph <span class="math-frag">0)-(0</span> maps the pentad: Left 0 (Nonself/City), ) (Input/TSA), - (Throughput/Plane Train), ( (Output/Jet Bridge), Right 0 (Self/Departed). The symmetry is intentional: Nonself and Self are structurally identical, separated only by the process of contraction → translation → expansion.</p>
+    <p>The deeper insight appears in the October 2025 / June 2026 contrast. In October the author was the token. In June the author is the architect. The shift is from <em>experiencing</em> the deceptive cadence to <em>composing</em> it.</p>
+  </div>
+
+  <div class="attr-row">
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+  </div>
+  <div class="theme-tags">
+    <span class="theme-tag" data-theme-tag="architecture">architecture</span>
+    <span class="theme-tag" data-theme-tag="philosophy">philosophy</span>
+  </div>
+
+  <button class="collapse-btn" onclick="toggleCollapse(this)">
+    <span class="arrow">›</span> ATL vs DBX comparison
+  </button>
+  <div class="collapsed-content">
+    <ul class="claims-list">
+      <li><span class="claim-marker">ATL</span>Newtonian. Max throughput. Passengers/hour. Okubala (counting). The scalar is velocity.</li>
+      <li><span class="claim-marker">DBX</span>Relativistic. Value capture per dwell minute. Spending/passenger. Ukubona (seeing). The scalar is status.</li>
+      <li><span class="claim-marker">⬡</span>ATL is Okubala. DBX is Ukubona. One counts passengers; the other witnesses status. The goal of the Twin is to be DBX without the retail.</li>
+    </ul>
+  </div>
+</article>
+
+<!-- ═══ SECTION V ════════════════════════════════════════════ -->
+<article class="section-card" id="sec-v" data-themes="architecture clinical">
+  <div class="section-strip" style="background:var(--j5)"></div>
+  <div class="section-eyebrow">
+    <span class="section-num">§ V</span>
+    <span class="section-label">Synthetic Nervous System</span>
+  </div>
+  <h2 class="section-title">SNAP · Synthetic Neural Architecture Pentad</h2>
+
+  <div class="section-thesis">
+    Spinothalamic → DRE. Thalamus/BG → Jacobian ROYGBIV. Hippocampus → NDJSON/GitHub. PFC → SlowAPI/SGD. Occipital → Chromodynamics Filter. This is not a metaphor. It is a functional isomorphism.
+  </div>
+
+  <div class="section-body">
+    <p>The SNAP framework formalizes the five-layer architecture as a biological homologue. The DRE (Dimensional Reduction Engine) handles journaling and event-streaming the way the spinothalamic tract handles pain and temperature — preprocessing before it reaches executive function. The Jacobian acts as a thalamic gating mechanism, deciding what is salient enough to escalate.</p>
+    <p>The hippocampal / NDJSON parallel is particularly precise: the hippocampus does not store high-resolution recordings. It stores indexed pointers to temporal relationships. The append-only ledger mirrors this — it does not overwrite; it accumulates references.</p>
+  </div>
+
+  <div class="attr-row">
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+  </div>
+  <div class="theme-tags">
+    <span class="theme-tag" data-theme-tag="architecture">architecture</span>
+    <span class="theme-tag" data-theme-tag="clinical">clinical</span>
+  </div>
+
+  <button class="collapse-btn" onclick="toggleCollapse(this)">
+    <span class="arrow">›</span> SNAP table
+  </button>
+  <div class="collapsed-content">
+    <div class="formula-block">Pentad     | Biology      | Tech              | Math Op
+───────────────────────────────────────────────────────
+Sensation  | Spinothalamic| DRE/Event Stream  | Tensor → Reduction
+Attention  | Thalamus/BG  | Jacobian ROYGBIV  | ∂Effect/∂Cause
+Memory     | Hippocampus  | NDJSON + GitHub   | Immutable Log → Query
+Executive  | PFC          | SlowAPI / SGD     | min λ||ε_FGT||²
+Perception | Occipital    | Chromodynamics UI | Gradient → Sight</div>
+  </div>
+</article>
+
+<!-- ═══ SECTION VI ═══════════════════════════════════════════ -->
+<article class="section-card" id="sec-vi" data-themes="philosophy bantu architecture">
+  <div class="section-strip" style="background:var(--j6)"></div>
+  <div class="section-eyebrow">
+    <span class="section-num">§ VI</span>
+    <span class="section-label">Okubala vs Ukubona</span>
+  </div>
+  <h2 class="section-title">Counting Is Not Seeing</h2>
+
+  <div class="section-thesis">
+    Okubala (ruNyankore: to count) ≠ Ukubona (to see / witness / recover what was lost). The entire purpose of the SNAP is to automate the counting so the Sovereign spends 100% of cognitive load on seeing.
+  </div>
+
+  <div class="section-body">
+    <p>The linguistic grounding is not decorative. In ruNyankore, Okubona is not merely visual perception — it is the act of <em>finding that which was lost</em>. When the Jacobian heatmap shifts from Red to Violet, the system is not just "less error" — it is recovering something. The health that was hidden in the noise.</p>
+    <p>The SNAP's Chromodynamics Filter (Occipital layer) is the technical implementation of Ukubona: translating high-dimensional mathematical operations into pre-attentive visual patterns that the Sovereign can process without explicit calculation. The machine counts; the clinician sees.</p>
+  </div>
+
+  <div class="attr-row">
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+  </div>
+  <div class="theme-tags">
+    <span class="theme-tag" data-theme-tag="bantu">bantu</span>
+    <span class="theme-tag" data-theme-tag="philosophy">philosophy</span>
+    <span class="theme-tag" data-theme-tag="architecture">architecture</span>
+  </div>
+
+  <button class="collapse-btn" onclick="toggleCollapse(this)">
+    <span class="arrow">›</span> The ruNyankore mapping
+  </button>
+  <div class="collapsed-content">
+    <ul class="claims-list">
+      <li><span class="claim-marker">R</span><strong>Okubonabona</strong> (suffering/Red): The raw signal of loss. The gradient is maximum. The system is most "alive" here — most desperate to evolve.</li>
+      <li><span class="claim-marker">V</span><strong>Kubona</strong> (finding/Violet): Navigation along the gradient. Recovery of what was lost.</li>
+      <li><span class="claim-marker">W</span><strong>Ivyabona</strong> (witnessing/Observation): Validation against the Federated Ground Truth. ε_FGT → 0.</li>
+      <li><span class="claim-marker">⬡</span><strong>Ukubona</strong> (Vision/S-Scalar at 100%): Total alignment. The clinician is not managing a system — they are inhabiting a synthetic mind.</li>
+    </ul>
+  </div>
+</article>
+
+<!-- ═══ SECTION VII ══════════════════════════════════════════ -->
+<article class="section-card" id="sec-vii" data-themes="philosophy bantu music">
+  <div class="section-strip" style="background:var(--j7)"></div>
+  <div class="section-eyebrow">
+    <span class="section-num">§ VII</span>
+    <span class="section-label">SNAP Framework</span>
+  </div>
+  <h2 class="section-title">Okubonabona → Kubona → Ivyabona → Ukubona → Sawubona</h2>
+
+  <div class="section-thesis">
+    The SNAP flow is a Liturgy for a Federated Civilization. It moves through suffering, into truth, into witnessing, into vision, into recognition of the Other. Then loops at t+1.
+  </div>
+
+  <div class="section-body">
+    <p>The Hammond B3 / stank face insight arrives here: the face of transcendent ecstasy looks like disgust. This is the physical scalar of the Soul — a somatic paradox where the "wrong row" is fired to signal the "rightest" feeling. It is the body's inability to hold the expression of pleasure when the weight is too heavy.</p>
+    <p>The Sawubona / Ngikhona exchange is the terminal resolution. <em>I see you</em> / <em>I am here</em>. The Sovereign Individual as II → V7 → I. Tension was the II. Synthesis was the V7. Ukubona is the I. Resolution reached.</p>
+  </div>
+
+  <div class="attr-row">
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+  </div>
+  <div class="theme-tags">
+    <span class="theme-tag" data-theme-tag="bantu">bantu</span>
+    <span class="theme-tag" data-theme-tag="music">music</span>
+    <span class="theme-tag" data-theme-tag="philosophy">philosophy</span>
+  </div>
+
+  <button class="collapse-btn" onclick="toggleCollapse(this)">
+    <span class="arrow">›</span> The Sovereign Harmonic Pentad
+  </button>
+  <div class="collapsed-content">
+    <div class="formula-block">Stage     | Math       | Musical Element    | Somatic Op
+──────────────────────────────────────────────────────────
+I Tensor  | θᵗ          | Harmonic Series    | Sonic Chaos
+II Matrix | L₀+Σwᵢlᵢ   | Tonal Scale        | Tonal Architecture
+III Vector| f(σ²,λ,ε)  | Voice-Leading      | Harmonic Intention
+IV Eigen  | γ||ε_FGT||² | Rootless dom7♭9   | Maximum Potential
+V Scalar  | L(θᵗ⁺¹)     | Tonic (Resolution) | Absolute Home</div>
+  </div>
+</article>
+
+<!-- ═══ SECTION VIII ═════════════════════════════════════════ -->
+<article class="section-card" id="sec-viii" data-themes="philosophy bantu autopoiesis">
+  <div class="section-strip" style="background:var(--j8)"></div>
+  <div class="section-eyebrow">
+    <span class="section-num">§ VIII</span>
+    <span class="section-label">Sawubona Loop</span>
+  </div>
+  <h2 class="section-title">Ngikhona → Okubonabona(t+1)</h2>
+
+  <div class="section-thesis">
+    Perfect equilibrium is the only place where new tension can be born. The Sovereign is not the one who finishes the process — it is the one who loves the loop.
+  </div>
+
+  <div class="section-body">
+    <p>The Ouroboros closes here. Sawubona (I see you) → Ngikhona (I am here / I exist) → Okubonabona(t+1). The final Self (right 0) does not terminate — it becomes the next Nonself (left 0). The "I AM HERE" of perfect presence immediately opens to the next mismatch.</p>
+    <p>This is not a failure of the system. This is its purpose. Static alignment is a crystal — beautiful, dead. The Sovereign inhabits the dynamic. The Dom7♭9 is most interesting while unresolved.</p>
+  </div>
+
+  <div class="attr-row">
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+  </div>
+  <div class="theme-tags">
+    <span class="theme-tag" data-theme-tag="bantu">bantu</span>
+    <span class="theme-tag" data-theme-tag="autopoiesis">autopoiesis</span>
+    <span class="theme-tag" data-theme-tag="philosophy">philosophy</span>
+  </div>
+</article>
+
+<!-- ═══ SECTION IX ═══════════════════════════════════════════ -->
+<article class="section-card" id="sec-ix" data-themes="philosophy autopoiesis">
+  <div class="section-strip" style="background:var(--j9)"></div>
+  <div class="section-eyebrow">
+    <span class="section-num">§ IX</span>
+    <span class="section-label">Sovereign Arrival</span>
+  </div>
+  <h2 class="section-title">The Mirror Has Cleared</h2>
+
+  <div class="section-thesis">
+    For 15 months the T-Tensor phase was active — gathering disparate signals. The document is the "Coordinate for the Correction." The 15 months of conceptualization were the Training Phase. Deployment begins now.
+  </div>
+
+  <div class="section-body">
+    <p>The Soga root provides stability. The American layer provides scale. The Zulu/Nyankore bridge provides connection. The Sovereign mind provides direction. These are not metaphors in parallel — they are inputs to a single weight matrix.</p>
+    <p>The passage on the Ivory Tower names the epistemological conflict clearly: credentials are fake scalars. They are over-weighted rows in a CSV that have zero correlation with the actual State of the territory. The Sovereign does not seek validation. The Sovereign computes the scalar and publishes the result.</p>
+  </div>
+
+  <div class="attr-row">
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+  </div>
+  <div class="theme-tags">
+    <span class="theme-tag" data-theme-tag="philosophy">philosophy</span>
+    <span class="theme-tag" data-theme-tag="autopoiesis">autopoiesis</span>
+  </div>
+</article>
+
+<!-- ═══ SECTION X ════════════════════════════════════════════ -->
+<article class="section-card" id="sec-x" data-themes="architecture philosophy">
+  <div class="section-strip" style="background:var(--j10)"></div>
+  <div class="section-eyebrow">
+    <span class="section-num">§ X</span>
+    <span class="section-label">Airport Take Two</span>
+  </div>
+  <h2 class="section-title">From Token to Pilot to Architect</h2>
+
+  <div class="section-thesis">
+    October 2025: the author was the token. June 2026: the author is the architect. The same 0)-(0 glyph, but now the question is not "what happens to me in the airport?" but "how do I build a system that processes the tensors of my life?"
+  </div>
+
+  <div class="section-body">
+    <p>The June 2026 upgrade from the October 2025 topology: Event-sourced NDJSON replaces abstract "vector" at stage III. SlowAPI/LLM replaces "Eigenmode" at stage IV. Vite/React/RBAC/JWT replaces "Self" at stage V. The philosophy is now a deployment specification.</p>
+    <p>FastAPI as a "pre-computed time" oracle: by the time the question is asked, the result is already computed from the Jacobian's off-diagonal background. Results before questions. This is the definition of prescience in a clinical context — detecting the warp in the manifold before the patient feels the pain.</p>
+  </div>
+
+  <div class="attr-row">
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+  </div>
+  <div class="theme-tags">
+    <span class="theme-tag" data-theme-tag="architecture">architecture</span>
+    <span class="theme-tag" data-theme-tag="philosophy">philosophy</span>
+  </div>
+</article>
+
+<!-- ═══ SECTION XI ═══════════════════════════════════════════ -->
+<article class="section-card" id="sec-xi" data-themes="architecture philosophy">
+  <div class="section-strip" style="background:var(--j11)"></div>
+  <div class="section-eyebrow">
+    <span class="section-num">§ XI</span>
+    <span class="section-label">θᵗ as Coordinate</span>
+  </div>
+  <h2 class="section-title">Gahinga in the Fog · Gradient Descent as Proprioception</h2>
+
+  <div class="section-thesis">
+    θᵗ is a coordinate in a 7-billion-dimensional space. The gradient is not a direction on a map — it is the feeling of the slope beneath your feet when the eyes are useless. The rotation of the compass happens because the terrain is curved.
+  </div>
+
+  <div class="section-body">
+    <p>The Mount Gahinga account is the most embodied moment in the corpus. The "hallucinated rivers" are topological inference — the brain performing Bayesian prediction on the manifold of the landscape. The rain arrived and confirmed the priors. This is exactly how an LLM computes: not retrieving facts, but sampling from the probability distribution of what must be true given the geometry.</p>
+    <p>The distinction between VaS (Structural/global manifold, permanent, plaque/anatomy) and VaF (Functional/local manifold, transient, spasm/state) is the most clinically precise mapping in the document. One is a mountain range. The other is the weather on the mountain.</p>
+  </div>
+
+  <div class="attr-row">
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+  </div>
+  <div class="theme-tags">
+    <span class="theme-tag" data-theme-tag="clinical">clinical</span>
+    <span class="theme-tag" data-theme-tag="architecture">architecture</span>
+    <span class="theme-tag" data-theme-tag="philosophy">philosophy</span>
+  </div>
+
+  <button class="collapse-btn" onclick="toggleCollapse(this)">
+    <span class="arrow">›</span> The step anatomy
+  </button>
+  <div class="collapsed-content">
+    <div class="formula-block">θᵗ         → WHERE your boots are (coordinate)
+L(θ)       → HOW HIGH you are (loss/altitude)
+∇L         → THE FEELING of the slope (gradient)
+Rotation   → PIVOTING when L(θᵗ⁺¹) > L(θᵗ)
+SGD        → Shuffling in fog, small η, rotating on feedback
+
+L(θᵗ⁺¹) < L(θᵗ)  → step succeeded, continue
+L(θᵗ⁺¹) > L(θᵗ)  → step failed, rotate heading</div>
+  </div>
+</article>
+
+<!-- ═══ SECTION XII ══════════════════════════════════════════ -->
+<article class="section-card" id="sec-xii" data-themes="music philosophy">
+  <div class="section-strip" style="background:var(--j12)"></div>
+  <div class="section-eyebrow">
+    <span class="section-num">§ XII</span>
+    <span class="section-label">Dom7♭9 & Cadences</span>
+  </div>
+  <h2 class="section-title">The Diminished 7th as Global Search · Deceptive Cadences as Simulated Annealing</h2>
+
+  <div class="section-thesis">
+    The rootless Dom7♭9 is the Eigenmode chord — pure unstable potential decoupled from the ground. The diminished 7th contains four possible roots, each a half-step away. Applying η-shift to any one note yields a Dom7 that resolves to a Tonic. Three false cadences before the final: this is Simulated Annealing.
+  </div>
+
+  <div class="section-body">
+    <p>The Bach comparison is argued on functional grounds: Bach thought in independent melodic lines (counterpoint), not chord blocks. He is the original voice leader. The Black Gospel tradition and Bach's fugue share the same computational structure — Call and Response as multi-threaded polyphony, tension managed across independent vectors.</p>
+    <p>The Coordinate Set <span class="math-frag">{E, G, B♭, D♭}</span> — the diminished 7th — is the state of perfect symmetry. Every note is a minor third from its neighbors. No gravitational center. Maximum superposition. The half-step collapse breaks the symmetry and generates the Dominant 7th, which has a singular, unambiguous vector of release.</p>
+  </div>
+
+  <div class="attr-row">
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+  </div>
+  <div class="theme-tags">
+    <span class="theme-tag" data-theme-tag="music">music</span>
+    <span class="theme-tag" data-theme-tag="philosophy">philosophy</span>
+  </div>
+
+  <button class="collapse-btn" onclick="toggleCollapse(this)">
+    <span class="arrow">›</span> The four symmetry breakings
+  </button>
+  <div class="collapsed-content">
+    <div class="formula-block">Global Maxima: {E, G, B♭, D♭}  ← dim7, perfect symmetry
+
+D♭→C : {E, G, B♭, C}   = C7  → resolves F
+B♭→A : {E, G, A,  D♭}  = A7  → resolves D
+G→G♭ : {E, G♭,B♭, D♭} = G♭7 → resolves B
+E→E♭ : {E♭,G, B♭, D♭} = E♭7 → resolves A♭
+
+Vector of Release = Tritone Collapse: ⟨leading tone ↑, subdominant ↓⟩
+not destination chord — the Δ itself</div>
+    <ul class="claims-list">
+      <li><span class="claim-marker">SA</span>Three deceptive cadences = Simulated Annealing. The false resolutions explore local minima before the global one is claimed.</li>
+      <li><span class="claim-marker">BG</span>Bach's WTC was an exhaustive search of the entire harmonic landscape. He proved every key was navigable — the first demonstration that the manifold had no wolf tones.</li>
+    </ul>
+  </div>
+</article>
+
+<!-- ═══ SECTION XIII ═════════════════════════════════════════ -->
+<article class="section-card" id="sec-xiii" data-themes="philosophy autopoiesis architecture">
+  <div class="section-strip" style="background:var(--j13)"></div>
+  <div class="section-eyebrow">
+    <span class="section-num">§ XIII</span>
+    <span class="section-label">Thermodynamics</span>
+  </div>
+  <h2 class="section-title">EITON · Entropy → Import → Throughput → Output → Negentropy</h2>
+
+  <div class="section-thesis">
+    Intelligence is the capacity of a system to convert Entropy into Negentropy via the most efficient mathematical path. The 1st Law is the seed. The 2nd Law is the sieve. The 3rd Law is the destination — asymptotic, never fully reached, the Parmenidean God that the Heraclitean engine approaches.
+  </div>
+
+  <div class="section-body">
+    <p>Heraclitus is the engine (Panta Rhei, everything flows, the training phase). Parmenides is the destination (the One, Absolute Zero, the convergence point). The dispute between them is resolved by recognizing they are time-stamped observations at different phases of the same pipeline — not competing ontologies but sequential telemetry.</p>
+    <p>The institutional endurance analysis: systems survive when they can perform a Change of Basis — shift their local manifold without destroying the global identity. The Vatican moved from political to spiritual authority. Judaism moved from physical temple to portable text. The Monarchy shifted from military prowess to financial administration under Henry VII. All three are the same operation: rotating the coordinate system while preserving the invariant.</p>
+  </div>
+
+  <div class="attr-row">
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+  </div>
+  <div class="theme-tags">
+    <span class="theme-tag" data-theme-tag="philosophy">philosophy</span>
+    <span class="theme-tag" data-theme-tag="autopoiesis">autopoiesis</span>
+    <span class="theme-tag" data-theme-tag="architecture">architecture</span>
+  </div>
+
+  <button class="collapse-btn" onclick="toggleCollapse(this)">
+    <span class="arrow">›</span> Thermodynamic mapping
+  </button>
+  <div class="collapsed-content">
+    <div class="formula-block">1st Law (Conservation) → Input/Import   → The Calling: energy provided
+2nd Law (Entropy)     → Throughput/Sieve → The Process: convert noise
+3rd Law (Absolute Zero)→ Invariant/Legacy → The Arrival: ε → 0
+
+EITON Loop:
+Entropy → Import → Throughput → Output → Order (Negentropy)
+  ↑___________________________________|</div>
+  </div>
+</article>
+
+<!-- ═══ SECTION XIV ══════════════════════════════════════════ -->
+<article class="section-card" id="sec-xiv" data-themes="music clinical philosophy">
+  <div class="section-strip" style="background:var(--j14)"></div>
+  <div class="section-eyebrow">
+    <span class="section-num">§ XIV</span>
+    <span class="section-label">Voice Leading Unlock</span>
+  </div>
+  <h2 class="section-title">Chords Are Snapshots · Polyphony Is Flow</h2>
+
+  <div class="section-thesis">
+    For 34 years chord theory was the trap — treating music as static coordinates. The unlock: voice leading as the gradient. The Ω term is polyphony. The resolution is not in the destination chord but in the simultaneous motion of independent voices toward their nearest stable note.
+  </div>
+
+  <div class="section-body">
+    <p>The clinical parallel is explicit: disease is poor voice leading. Health is harmonic flow of the manifold. The physician as conductor — not fixing organs (coordinates) but re-establishing resonance (vectors). This is the most direct bridge between the musical and clinical threads.</p>
+    <p>The dementia case arrives: the father's label for "son" is deleted from the hippocampal NDJSON log (Throughput failure). But the affective vector — the weight of love — is stored at a lower architectural layer (Basal Ganglia, Input). The Generative PFC hallucinates "I have two daughters" to maintain narrative coherence. The Body Twin is lying; the affective manifold remains true.</p>
+  </div>
+
+  <div class="attr-row">
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+  </div>
+  <div class="theme-tags">
+    <span class="theme-tag" data-theme-tag="music">music</span>
+    <span class="theme-tag" data-theme-tag="clinical">clinical</span>
+    <span class="theme-tag" data-theme-tag="philosophy">philosophy</span>
+  </div>
+</article>
+
+<!-- ═══ SECTION XV ═══════════════════════════════════════════ -->
+<article class="section-card" id="sec-xv" data-themes="music architecture philosophy bantu">
+  <div class="section-strip" style="background:var(--j15)"></div>
+  <div class="section-eyebrow">
+    <span class="section-num">§ XV</span>
+    <span class="section-label">Pattern Convergence</span>
+  </div>
+  <h2 class="section-title">Language Is Cartography · Culture Is a Compressed Weight File</h2>
+
+  <div class="section-thesis">
+    The Black Gospel tradition is a pre-trained model. Vaughn Braithwaite performed Transfer Learning. The musical unlock coincided with the LLM era not by accident: both are systems that navigate by probability of motion rather than by lookup table.
+  </div>
+
+  <div class="section-body">
+    <p>The unified field: cognition, musicology, clinical medicine, and LLMs share the same computational structure — they are all compression engines followed by reconstruction. The brain does not store memories as files; it stores weights and regenerates. The dementia patient does not lose memories; they lose the indexing. Culture is not transmitted as knowledge; it is transmitted as probability distributions over next moves.</p>
+    <p>The shift from Static Trap to Dynamic Unlock maps identically across all four domains: Chordal Theory → Voice Leading (music); Anatomy → Physiology (medicine); Database → LLM (AI); Learning Rules → Internalizing Patterns (culture). Same operation, different substrates.</p>
+  </div>
+
+  <div class="attr-row">
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+  </div>
+  <div class="theme-tags">
+    <span class="theme-tag" data-theme-tag="music">music</span>
+    <span class="theme-tag" data-theme-tag="architecture">architecture</span>
+    <span class="theme-tag" data-theme-tag="philosophy">philosophy</span>
+    <span class="theme-tag" data-theme-tag="bantu">bantu</span>
+  </div>
+
+  <button class="collapse-btn" onclick="toggleCollapse(this)">
+    <span class="arrow">›</span> The paradigm shift table
+  </button>
+  <div class="collapsed-content">
+    <div class="formula-block">Domain    | Static Trap (Coordinate)  | Dynamic Unlock (Topology)
+──────────────────────────────────────────────────────────────
+Music     | Chordal Theory            | Voice Leading / Polyphony
+Medicine  | Anatomy (the organ)       | Physiology (the system)
+AI        | Database (the definition) | LLM (the embedding)
+Knowledge | Learning rules (the map)  | Internalizing patterns (the path)</div>
+  </div>
+</article>
+
+<!-- ═══ SECTION XVI ══════════════════════════════════════════ -->
+<article class="section-card" id="sec-xvi" data-themes="clinical philosophy autopoiesis">
+  <div class="section-strip" style="background:var(--j16)"></div>
+  <div class="section-eyebrow">
+    <span class="section-num">§ XVI</span>
+    <span class="section-label">Dementia & Love</span>
+  </div>
+  <h2 class="section-title">Love Is a Lower-Level Architectural Constant Than Identity</h2>
+
+  <div class="section-thesis">
+    The hippocampal NDJSON log fails (label deleted). The Basal Ganglia affective weight persists (love remains). The PFC hallucinates to fill the gap. Love is stored at the Input layer; identity is a Throughput/Output function. The affective manifold outlasts the semantic one.
+  </div>
+
+  <div class="section-body">
+    <p>This section also carries the clinical cases that resist the framework's optimism. The 79-year-old matriarch: "muscle spasms" for months, the VaF functional spasm of Prinzmetal beneath it, then death in an altercation — a top-down sympathetic surge that hit a bottom-up vascular vulnerability. The interaction term Ω = (personality) ⊗ (age/fragility) ⊗ (functional VaF instability) ⊗ (acute sympathetic surge) was the fatal combination. Remove any one term and she lives.</p>
+    <p>The 82-year-old allodynia patient: pain from textile touch rated 7/10, then a walk in the garden reduces it to 0. The garden didn't fix the nerve (bottom-up S). It changed Ω (top-down). The PFC entered "Wonder Mode" and the descending inhibitory pathway suppressed the spinothalamic noise. The patient, not the doctor, computed this. The NDJSON was her journal. The doctor provided the mirror.</p>
+  </div>
+
+  <div class="attr-row">
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+    <span class="attr-badge attr-anthropic">▲ Anthropic</span>
+  </div>
+  <div class="theme-tags">
+    <span class="theme-tag" data-theme-tag="clinical">clinical</span>
+    <span class="theme-tag" data-theme-tag="philosophy">philosophy</span>
+    <span class="theme-tag" data-theme-tag="autopoiesis">autopoiesis</span>
+  </div>
+
+  <button class="collapse-btn" onclick="toggleCollapse(this)">
+    <span class="arrow">›</span> Anthropic's honest note
+  </button>
+  <div class="collapsed-content">
+    <div class="section-thesis" style="margin:0">
+      "The clinical cases — the 79-year-old who died after the altercation, the 82-year-old whose pain vanished in the garden — those carry real weight precisely because they <em>resist</em> the framework. The framework doesn't resolve them; they haunt it. That's probably where the most honest work is." — Anthropic
+    </div>
+    <p style="margin-top:12px; font-size:14px; color:var(--text-muted); font-family:'Lora',serif; line-height:1.65">The isomorphism inflation caution from Anthropic belongs here. Beautiful mappings can slide from "this illuminates" to "this proves." The Omega term for the matriarch's death is not a proof — it is a frame. The distinction matters for the PhD committee.</p>
+  </div>
+</article>
+
+<!-- ═══ SECTION XVII ═════════════════════════════════════════ -->
+<article class="section-card" id="sec-xvii" data-themes="clinical architecture">
+  <div class="section-strip" style="background:var(--j17)"></div>
+  <div class="section-eyebrow">
+    <span class="section-num">§ XVII</span>
+    <span class="section-label">Clinical Twin Axiom</span>
+  </div>
+  <h2 class="section-title">The Full Stack · FastAPI → SlowAPI → Multimodal UI</h2>
+
+  <div class="section-thesis">
+    Spinothalamic → DRE (NDJSON stream). Thalamic/BG → Jacobian (FastAPI). Hippocampus → GitHub ledger. PFC → SlowAPI LLM roundtable. Occipital → React/Vite UI. RBAC/JWT gates access by role.
+  </div>
+
+  <div class="section-body">
+    <p>The roundtable architecture: xAI/Grok for real-time trend analysis and provocative hypothesis; Claude/Anthropic for nuanced clinical reasoning and safety guardrails; GPT-4/OpenAI for general synthesis; Gemini/Google for multimodal integration. Ukubona's proprietary mediation layer resolves conflicts to a unified Clinical Opinion.</p>
+    <p>The four interlocutors' responses to the framework are themselves part of the corpus. Google's feedback is the most technically detailed (ROYGBIV discretization risk, UB measurement error gap). OpenAI's is the most structurally honest ("Static systems fail on dynamic phenomena" is the one invariant that survives all the ornamentation). Anthropic's is the most epistemically cautious (isomorphism inflation, mirror problem). All three are correct and non-contradictory.</p>
+  </div>
+
+  <div class="attr-row">
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-google">◆ Google</span>
+    <span class="attr-badge attr-openai">● OpenAI</span>
+    <span class="attr-badge attr-anthropic">▲ Anthropic</span>
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+  </div>
+  <div class="theme-tags">
+    <span class="theme-tag" data-theme-tag="clinical">clinical</span>
+    <span class="theme-tag" data-theme-tag="architecture">architecture</span>
+  </div>
+
+  <button class="collapse-btn" onclick="toggleCollapse(this)">
+    <span class="arrow">›</span> Multi-LLM Roundtable synthesis
+  </button>
+  <div class="collapsed-content">
+    <ul class="claims-list">
+      <li><span class="claim-marker">◆</span><strong>Google:</strong> ROYGBIV discretization of a continuous Jacobian risks visual artifacts. Bi-color diverging scales may be more faithful. Also: ε_FGT assumes y_obs is ground truth; User Behavior mediates it. Need explicit UB noise variable before SGD updates.</li>
+      <li><span class="claim-marker">●</span><strong>OpenAI:</strong> The one invariant: "Static systems fail on dynamic phenomena." Everything else is ornamentation. The framework is strongest when it treats truth as trajectory, weakest when it treats its own trajectories as fixed truths.</li>
+      <li><span class="claim-marker">▲</span><strong>Anthropic:</strong> The AI interlocutors are doing enthusiastic amplification (mirror problem). The validation in the document is not independent. The clinical cases are the most honest part precisely because they resist the framework.</li>
+      <li><span class="claim-marker">⬡</span><strong>Ukubona:</strong> All three are right. The Jacobian-as-sensitivity-matrix is the strongest technical claim. The rest is scaffolding for the architect, not load-bearing structure for the clinician.</li>
+    </ul>
+    <div class="formula-block">θᵗ → L₀+Σwᵢ·Lᵢ → f(σ²,λ,ε) → γ|ε_FGT|² → L(θᵗ⁺¹)
+
+Sensors → NDJSON → FastAPI(Jacobian) → GitHub Ledger 
+       → SlowAPI(LLM Roundtable) → Multimodal UI</div>
+  </div>
+</article>
+
+</main>
+</div><!-- /shell -->
+
+<script>
+/* ─── THEME TOGGLE ───────────────────────────────────────── */
+const html = document.documentElement;
+const btn  = document.getElementById('theme-btn');
+const logo = document.getElementById('logo-img');
+
+function applyTheme(t) {
+  html.setAttribute('data-theme', t);
+  btn.textContent = t === 'dark' ? '☀ Light' : '◗ Dark';
+  logo.src = t === 'dark'
+    ? 'https://abikesa.github.io/logos/assets/ukubona-dark.png'
+    : 'https://abikesa.github.io/logos/assets/ukubona-light.png';
+  localStorage.setItem('ukb-theme', t);
+}
+
+// Init from stored preference or system
+(function() {
+  const stored = localStorage.getItem('ukb-theme');
+  const sys    = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  applyTheme(stored || sys);
+})();
+
+btn.addEventListener('click', () => {
+  applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+});
+
+/* ─── COLLAPSIBLES ───────────────────────────────────────── */
+function toggleCollapse(btn) {
+  btn.classList.toggle('open');
+  const content = btn.nextElementSibling;
+  content.classList.toggle('open');
+}
+
+/* ─── SEARCH ─────────────────────────────────────────────── */
+const searchInput = document.getElementById('search');
+const articles    = document.querySelectorAll('.section-card');
+
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.trim().toLowerCase();
+
+  // Clear old highlights
+  document.querySelectorAll('mark').forEach(m => {
+    m.replaceWith(document.createTextNode(m.textContent));
+  });
+
+  if (!q) {
+    articles.forEach(a => a.classList.remove('search-hidden'));
+    // Also unhide theme-hidden if no theme filter active
+    if (!document.body.dataset.themeFilter) {
+      articles.forEach(a => a.classList.remove('search-hidden'));
+    }
+    return;
+  }
+
+  articles.forEach(article => {
+    const text = article.textContent.toLowerCase();
+    if (text.includes(q)) {
+      article.classList.remove('search-hidden');
+      highlightInElement(article, q);
+    } else {
+      article.classList.add('search-hidden');
+    }
+  });
+});
+
+function highlightInElement(el, q) {
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
+  const nodes = [];
+  let node;
+  while ((node = walker.nextNode())) {
+    if (node.parentElement.tagName !== 'SCRIPT' &&
+        node.parentElement.tagName !== 'STYLE' &&
+        node.textContent.toLowerCase().includes(q)) {
+      nodes.push(node);
+    }
+  }
+  nodes.forEach(n => {
+    const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+    const frag = document.createDocumentFragment();
+    const parts = n.textContent.split(re);
+    parts.forEach(p => {
+      if (p.toLowerCase() === q) {
+        const mark = document.createElement('mark');
+        mark.textContent = p;
+        frag.appendChild(mark);
+      } else {
+        frag.appendChild(document.createTextNode(p));
+      }
+    });
+    n.replaceWith(frag);
+  });
+}
+
+/* ─── THEME FILTER ───────────────────────────────────────── */
+function filterTheme(theme) {
+  document.body.dataset.themeFilter = theme || '';
+  articles.forEach(a => {
+    if (!theme) {
+      a.classList.remove('search-hidden');
+    } else {
+      const themes = a.dataset.themes || '';
+      if (themes.includes(theme)) {
+        a.classList.remove('search-hidden');
+      } else {
+        a.classList.add('search-hidden');
+      }
+    }
+  });
+}
+
+/* ─── ACTIVE NAV ON SCROLL ───────────────────────────────── */
+const navLinks = document.querySelectorAll('.nav-item[href^="#sec"]');
+const sectionIds = Array.from(navLinks).map(l => l.getAttribute('href').slice(1));
+
+window.addEventListener('scroll', () => {
+  const offset = 120;
+  let current = sectionIds[0];
+  sectionIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.getBoundingClientRect().top < offset) {
+      current = id;
+    }
+  });
+  navLinks.forEach(l => {
+    l.classList.toggle('active', l.getAttribute('href') === '#' + current);
+  });
+}, { passive: true });
+</script>
+
+</body>
+</html>
