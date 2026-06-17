@@ -34,8 +34,12 @@
   --accent-blue: #7a9cc4;
   --logo-src:    url("https://abikesa.github.io/logos/assets/ukubona-dark.png");
 
-  /* Jacobian ROYGBIV spectrum — 17 sections */
-  --j1:  #e03030; /* R */
+  --sidebar-w: 260px;
+  --rail-w:    200px;
+  --attr-w:    180px;
+  --hdr-h:     56px;
+
+  --j1:  #e03030;
   --j2:  #e05a20;
   --j3:  #e08020;
   --j4:  #d4a020;
@@ -51,11 +55,7 @@
   --j14: #6028b8;
   --j15: #7818a0;
   --j16: #8c1088;
-  --j17: #9c1070; /* V */
-
-  --sidebar-w: 260px;
-  --attr-w: 180px;
-  --hdr-h: 56px;
+  --j17: #9c1070;
 }
 
 [data-theme="light"] {
@@ -94,7 +94,7 @@ body {
 }
 
 #logo-wrap {
-  width: 34px; height: 34px; flex-shrink: 0;
+  width: 80px; height: 80px; flex-shrink: 0;
   animation: spin-slow 120s linear infinite;
 }
 #logo-wrap img {
@@ -159,6 +159,7 @@ body {
   display: flex;
   margin-top: var(--hdr-h);
   min-height: calc(100vh - var(--hdr-h));
+  justify-content: flex-start;
 }
 
 /* ─── SIDEBAR ────────────────────────────────────────────── */
@@ -176,6 +177,45 @@ body {
 }
 #sidebar::-webkit-scrollbar { width: 4px; }
 #sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ─── RIGHT RAIL ─────────────────────────────────────────── */
+#right-rail {
+  width: var(--rail-w);
+  flex-shrink: 0;
+  position: fixed;
+  top: var(--hdr-h);
+  bottom: 0;
+  right: 0;
+  overflow-y: auto;
+  border-left: 1px solid var(--border);
+  background: var(--bg-card);
+  padding: 16px 0 40px;
+}
+#right-rail::-webkit-scrollbar { width: 4px; }
+#right-rail::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.rail-active-section {
+  margin: 0 14px 20px;
+  padding: 10px 12px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+.rail-active-section .rail-sec-num {
+  color: var(--accent-amber);
+  font-weight: 700;
+  display: block;
+  margin-bottom: 3px;
+}
+.rail-active-section .rail-sec-title {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-family: 'Space Grotesk', sans-serif;
+}
 
 .nav-group-label {
   font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
@@ -224,10 +264,11 @@ body {
 /* ─── MAIN PANE ──────────────────────────────────────────── */
 #main {
   margin-left: var(--sidebar-w);
+  margin-right: var(--rail-w);
   flex: 1;
   min-width: 0;
   padding: 40px 48px 80px;
-  max-width: 860px;
+  max-width: none;
 }
 
 /* ─── SECTION CARDS ──────────────────────────────────────── */
@@ -493,9 +534,11 @@ mark {
 }
 
 /* ─── RESPONSIVE ─────────────────────────────────────────── */
+/* REPLACE WITH */
 @media (max-width: 768px) {
   #sidebar { display: none; }
-  #main { margin-left: 0; padding: 24px 20px 60px; }
+  #right-rail { display: none; }
+  #main { margin-left: 0; margin-right: 0; padding: 24px 20px 60px; }
   #search { width: 130px; }
   #site-sub { display: none; }
 }
@@ -584,7 +627,27 @@ mark {
     <span class="nav-spectrum" style="background:var(--j17)"></span> XVII · Clinical Twin Axiom
   </a>
 
-  <div class="nav-group-label" style="margin-top:10px">Themes</div>
+ 
+  <div class="nav-group-label" style="margin-top:10px">Interlocutors</div>
+  <div style="padding: 4px 18px 0; display:flex; flex-direction:column; gap:6px;">
+    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
+    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
+    <span class="attr-badge attr-google">◆ Google</span>
+    <span class="attr-badge attr-openai">● OpenAI</span>
+    <span class="attr-badge attr-anthropic">▲ Anthropic</span>
+  </div>
+
+</nav>
+
+<!-- ─── RIGHT RAIL ──────────────────────────────────────── -->
+<aside id="right-rail" aria-label="Theme navigation">
+
+  <div class="rail-active-section" id="rail-active">
+    <span class="rail-sec-num">§ I</span>
+    <span class="rail-sec-title">Probabilistic Flight</span>
+  </div>
+
+  <div class="nav-group-label">Themes</div>
 
   <div class="nav-theme-item" onclick="filterTheme('clinical')">
     <span class="nav-theme-dot" style="background:var(--accent-teal)"></span>
@@ -615,16 +678,12 @@ mark {
     Show all
   </div>
 
-  <div class="nav-group-label" style="margin-top:10px">Interlocutors</div>
-  <div style="padding: 4px 18px 0; display:flex; flex-direction:column; gap:6px;">
-    <span class="attr-badge attr-ukubona">⬡ Ukubona</span>
-    <span class="attr-badge attr-xai">✦ xAI / Gemma</span>
-    <span class="attr-badge attr-google">◆ Google</span>
-    <span class="attr-badge attr-openai">● OpenAI</span>
-    <span class="attr-badge attr-anthropic">▲ Anthropic</span>
+  <div class="nav-group-label" style="margin-top:16px">Active Tags</div>
+  <div id="rail-tags" style="padding: 6px 14px; display:flex; flex-direction:column; gap:6px;">
+    <!-- populated by scroll JS -->
   </div>
 
-</nav>
+</aside>
 
 <!-- ─── MAIN ─────────────────────────────────────────────── -->
 <main id="main">
@@ -1493,8 +1552,11 @@ function filterTheme(theme) {
 }
 
 /* ─── ACTIVE NAV ON SCROLL ───────────────────────────────── */
-const navLinks = document.querySelectorAll('.nav-item[href^="#sec"]');
+/* ─── ACTIVE NAV ON SCROLL ───────────────────────────────── */
+const navLinks   = document.querySelectorAll('.nav-item[href^="#sec"]');
 const sectionIds = Array.from(navLinks).map(l => l.getAttribute('href').slice(1));
+const railActive = document.getElementById('rail-active');
+const railTags   = document.getElementById('rail-tags');
 
 window.addEventListener('scroll', () => {
   const offset = 120;
@@ -1505,9 +1567,32 @@ window.addEventListener('scroll', () => {
       current = id;
     }
   });
+
+  /* highlight active sidebar link */
   navLinks.forEach(l => {
     l.classList.toggle('active', l.getAttribute('href') === '#' + current);
   });
+
+  /* update right rail: section number + title */
+  const activeLink = document.querySelector(`.nav-item[href="#${current}"]`);
+  if (activeLink && railActive) {
+    const txt   = activeLink.textContent.trim();
+    const match = txt.match(/^([IVX]+)\s·\s(.+)$/);
+    if (match) {
+      railActive.innerHTML =
+        `<span class="rail-sec-num">§ ${match[1]}</span>` +
+        `<span class="rail-sec-title">${match[2]}</span>`;
+    }
+  }
+
+  /* update right rail: active theme tags for current section */
+  const currentEl = document.getElementById(current);
+  if (currentEl && railTags) {
+    const themes = (currentEl.dataset.themes || '').split(' ').filter(Boolean);
+    railTags.innerHTML = themes
+      .map(t => `<span class="theme-tag" data-theme-tag="${t}">${t}</span>`)
+      .join('');
+  }
 }, { passive: true });
 </script>
 
